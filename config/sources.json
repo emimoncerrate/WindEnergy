@@ -1,0 +1,129 @@
+{
+  "sources": {
+    "nyserda": {
+      "name": "NYSERDA Offshore Wind",
+      "url": "https://www.nyserda.ny.gov/All-Programs/Offshore-Wind/Announcements-and-Events",
+      "description": "Primary source for New York-specific project solicitations, contract awards, and training grants",
+      "priority": "high",
+      "selectors": {
+        "articles": ".news-item, .announcement-item",
+        "title": "h2, h3, .title",
+        "link": "a",
+        "date": ".date, .published-date",
+        "content": ".content, .description"
+      }
+    },
+    "boem": {
+      "name": "BOEM New York Bight",
+      "url": "https://www.boem.gov/renewable-energy/state-activities/new-york-bight",
+      "description": "Federal-level news on lease auctions, environmental reviews, and project approvals",
+      "priority": "high",
+      "selectors": {
+        "articles": ".news-item, .announcement",
+        "title": "h2, h3, .title",
+        "link": "a",
+        "date": ".date, .published",
+        "content": ".content, .description"
+      }
+    },
+    "coned_transmission": {
+      "name": "Con Edison Transmission",
+      "url": "https://www.conedtransmission.com/es/news-and-media-center",
+      "description": "Direct, first-party news on their own projects and grid integration proposals",
+      "priority": "high",
+      "selectors": {
+        "articles": ".news-item, .media-item",
+        "title": "h2, h3, .title",
+        "link": "a",
+        "date": ".date, .published",
+        "content": ".content, .description"
+      }
+    },
+    "equinor": {
+      "name": "Equinor US News",
+      "url": "https://www.equinor.com/where-we-are/us-news",
+      "description": "Developer updates on project milestones, financial decisions, and key partnerships",
+      "priority": "medium",
+      "filters": ["offshore wind", "New York"],
+      "selectors": {
+        "articles": ".news-item, .article",
+        "title": "h2, h3, .title",
+        "link": "a",
+        "date": ".date, .published",
+        "content": ".content, .description"
+      }
+    },
+    "orsted_ny": {
+      "name": "Ørsted New York",
+      "url": "https://us.orsted.com/new-york",
+      "description": "Ørsted New York project updates and announcements",
+      "priority": "medium",
+      "selectors": {
+        "articles": ".news-item, .article",
+        "title": "h2, h3, .title",
+        "link": "a",
+        "date": ".date, .published",
+        "content": ".content, .description"
+      }
+    },
+    "orsted_news": {
+      "name": "Ørsted News Archive",
+      "url": "https://us.orsted.com/news-archive",
+      "description": "Ørsted news archive filtered for New York project news",
+      "priority": "medium",
+      "filters": ["New York", "offshore wind"],
+      "selectors": {
+        "articles": ".news-item, .article",
+        "title": "h2, h3, .title",
+        "link": "a",
+        "date": ".date, .published",
+        "content": ".content, .description"
+      }
+    },
+    "renewable_energy_world": {
+      "name": "Renewable Energy World Offshore Wind",
+      "url": "https://www.renewableenergyworld.com/wind-power/offshore/",
+      "description": "Industry news outlet with in-depth coverage of policy changes and infrastructure announcements",
+      "priority": "medium",
+      "filters": ["Northeast", "New York", "transmission", "infrastructure"],
+      "selectors": {
+        "articles": ".article, .news-item",
+        "title": "h2, h3, .title",
+        "link": "a",
+        "date": ".date, .published",
+        "content": ".content, .description"
+      }
+    }
+  },
+  "analysis_categories": {
+    "technology_types": [
+      "Grid Infrastructure & Interconnection",
+      "Subsea Cables",
+      "Port Infrastructure",
+      "Offshore Substation Platforms",
+      "Operations & Maintenance (O&M) Services"
+    ],
+    "grid_infrastructure_keywords": [
+      "onshore substation",
+      "transmission upgrade",
+      "cable landing",
+      "HVDC converter station",
+      "Clean Energy Hub",
+      "interconnection agreement"
+    ],
+    "priority_locations": [
+      "New York City",
+      "Long Island",
+      "New Jersey",
+      "Massachusetts",
+      "Brooklyn"
+    ],
+    "project_stages": [
+      "approved",
+      "breaks ground",
+      "construction begins",
+      "in operation",
+      "fully commissioned"
+    ]
+  }
+} 
