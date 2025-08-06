@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Offshore Wind Strategic Intelligence Platform - AI Analyzer
+Con Edison Strategic Investment Intelligence Platform - AI Analyzer
 
 This script processes raw scraped data using OpenAI API to extract structured insights
-and identify strategic opportunities for utilities in the Northeast offshore wind sector.
+and identify strategic investment opportunities for Con Edison's regulated utility business.
 """
 
 import os
@@ -28,12 +28,14 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-class OffshoreWindAnalyzer:
-    """AI-powered analyzer for offshore wind intelligence data."""
+class ConEdisonStrategicAnalyzer:
+    """
+    AI-powered analyzer that evaluates opportunities for Con Edison's regulated utility business.
+    Focuses on grid reliability, CLCPA compliance, and rate-based asset potential.
+    """
     
     def __init__(self):
-        """Initialize the analyzer with OpenAI client and configuration."""
-        # Initialize OpenAI client
+        """Initialize the analyzer with OpenAI API key."""
         api_key = os.getenv('OPENAI_API_KEY')
         if not api_key:
             raise ValueError("OPENAI_API_KEY environment variable is required")
@@ -41,291 +43,242 @@ class OffshoreWindAnalyzer:
         # Set API key for older OpenAI library
         openai.api_key = api_key
         
-        # Load configuration
-        self.config = self._load_config()
-        self.data_dir = os.getenv('DATA_DIR', './data')
-        self.raw_data_file = os.getenv('RAW_DATA_FILE', 'raw_data.csv')
-        self.analyzed_data_file = os.getenv('ANALYZED_DATA_FILE', 'analyzed_data.csv')
+        self.data_dir = "data"
+        os.makedirs(self.data_dir, exist_ok=True)
         
-        # Load analysis categories
-        self.analysis_categories = self.config.get('analysis_categories', {})
-        
-    def _load_config(self) -> Dict:
-        """Load configuration from sources.json."""
-        try:
-            with open('config/sources.json', 'r') as f:
-                return json.load(f)
-        except FileNotFoundError:
-            logger.error("Configuration file config/sources.json not found")
-            raise
-        except json.JSONDecodeError as e:
-            logger.error(f"Invalid JSON in configuration file: {e}")
-            raise
-    
-    def _create_analysis_prompt(self, article_text: str) -> str:
-        """Create a detailed prompt for AI analysis of offshore wind articles."""
-        
-        technology_types = self.analysis_categories.get('technology_types', [])
-        grid_keywords = self.analysis_categories.get('grid_infrastructure_keywords', [])
-        priority_locations = self.analysis_categories.get('priority_locations', [])
-        project_stages = self.analysis_categories.get('project_stages', [])
-        
-        prompt = f"""
-You are an expert analyst specializing in offshore wind energy infrastructure and utility strategic intelligence. 
-Analyze the following article text and extract structured data relevant to utility business needs.
-
-Article Text:
-{article_text}
-
-Please analyze this content and provide a JSON response with the following structure:
-
-{{
-    "technology_type": "Choose from: {', '.join(technology_types)}",
-    "grid_infrastructure_keywords": ["List any mentions of: {', '.join(grid_keywords)}"],
-    "location": "Identify specific geographic mentions, prioritizing: {', '.join(priority_locations)}",
-    "project_stage": "Choose from: {', '.join(project_stages)} or 'other'",
-    "funding_stage": "Identify funding stage: 'announced', 'approved', 'construction', 'operational', or 'other'",
-    "investment_amount": "Extract any mentioned dollar amounts or 'not specified'",
-    "strategic_relevance": "High/Medium/Low - relevance to utility grid infrastructure needs",
-    "key_insights": "Brief summary of most important strategic implications"
-}}
-
-Focus on:
-1. Grid infrastructure and transmission developments
-2. Cable landing sites and interconnection projects
-3. Substation and converter station developments
-4. Port infrastructure for offshore wind
-5. Regulatory and policy developments affecting utilities
-
-If information is not available in the text, use "not specified" or "other" as appropriate.
-"""
-        return prompt
+        # Utility strategic investment schema
+        self.schema = {
+            "investment_thesis_tag": "str",  # Grid Reliability, Peak Load Reduction, etc.
+            "technology_readiness_level": "int",  # 1-9 scale
+            "regulated_asset_potential": "bool",  # Can it be rate-based?
+            "ny_service_territory_relevance": "bool",  # NYC/Westchester impact
+            "grid_impact_score": "int",  # 1-10 scale
+            "clcpa_compliance_value": "str",  # How it helps meet CLCPA mandates
+            "capital_investment_required": "str",  # Low/Medium/High
+            "implementation_timeline": "str",  # Short/Medium/Long term
+            "risk_assessment": "str",  # Low/Medium/High
+            "strategic_priority": "str"  # High/Medium/Low based on Con Edison's strategic needs
+        }
     
     def analyze_article(self, article_data: Dict) -> Dict:
-        """Analyze a single article using OpenAI API."""
+        """
+        Analyze a single article using AI to extract utility strategic investment insights.
+        
+        Args:
+            article_data: Dictionary containing article information
+            
+        Returns:
+            Dictionary with structured utility investment analysis
+        """
         try:
-            # Combine title and content for analysis
-            article_text = f"Title: {article_data.get('title', '')}\n\nContent: {article_data.get('content', '')}"
+            # Prepare content for analysis
+            content = f"""
+Title: {article_data.get('title', 'N/A')}
+Content: {article_data.get('content', 'N/A')}
+Source: {article_data.get('source', 'N/A')}
+Date: {article_data.get('date', 'N/A')}
+            """
             
-            # Create analysis prompt
-            prompt = self._create_analysis_prompt(article_text)
+            # Strategic investment analysis prompt
+            prompt = f"""
+Act as a strategic investment analyst for Con Edison, New York's largest utility company. 
+Analyze the following document and evaluate it as a potential investment opportunity based on:
+
+1. Ability to enhance grid reliability and resilience
+2. Potential to meet New York CLCPA (Climate Leadership and Community Protection Act) mandates
+3. Suitability as a rate-based asset for regulated utility investment
+4. Relevance to Con Edison's NYC and Westchester County service territory
+
+Extract the following information and return as JSON:
+
+{{
+    "investment_thesis_tag": "Primary reason Con Edison should care (e.g., 'Grid Reliability', 'Peak Load Reduction', 'Transmission Decongestion', 'Electrification of Heat/Transport', 'Storm Hardening', 'Regulatory Compliance (CLCPA)', 'Demand Response', 'Energy Storage', 'Smart Grid Technology')",
+    "technology_readiness_level": "Score 1-9 (1-3=concept, 4-6=prototype, 7-9=commercial)",
+    "regulated_asset_potential": "true/false - can this become a rate-based asset?",
+    "ny_service_territory_relevance": "true/false - does this impact NYC/Westchester?",
+    "grid_impact_score": "Score 1-10 for potential grid improvement",
+    "clcpa_compliance_value": "How this helps meet CLCPA mandates (specific benefits)",
+    "capital_investment_required": "Low/Medium/High",
+    "implementation_timeline": "Short/Medium/Long term",
+    "risk_assessment": "Low/Medium/High",
+    "strategic_priority": "High/Medium/Low based on Con Edison's strategic needs"
+}}
+
+Document to analyze:
+{content}
+
+Return only valid JSON with the exact field names specified above.
+            """
             
-            # Call OpenAI API
+            # Get AI analysis using older API format
             response = openai.ChatCompletion.create(
-                model="gpt-4o-mini",  # Using a cost-effective model
+                model="gpt-3.5-turbo",
                 messages=[
-                    {"role": "system", "content": "You are an expert analyst specializing in offshore wind energy infrastructure and utility strategic intelligence."},
+                    {"role": "system", "content": "You are a utility strategic investment analyst specializing in regulated utility investments and grid modernization."},
                     {"role": "user", "content": prompt}
                 ],
-                temperature=0.1,  # Low temperature for consistent analysis
-                max_tokens=1000
+                temperature=0.3,
+                max_tokens=500
             )
             
-            # Extract and parse the response
-            analysis_text = response.choices[0].message.content
+            # Parse response
+            analysis_text = response.choices[0].message.content.strip()
             
-            # Try to parse JSON from the response
+            # Extract JSON from response
             try:
-                # Find JSON in the response (sometimes it's wrapped in markdown)
-                import re
-                json_match = re.search(r'\{.*\}', analysis_text, re.DOTALL)
-                if json_match:
-                    analysis_json = json.loads(json_match.group())
+                # Find JSON in the response
+                start_idx = analysis_text.find('{')
+                end_idx = analysis_text.rfind('}') + 1
+                if start_idx != -1 and end_idx != 0:
+                    json_str = analysis_text[start_idx:end_idx]
+                    analysis = json.loads(json_str)
                 else:
-                    # If no JSON found, create a basic structure
-                    analysis_json = {
-                        "technology_type": "other",
-                        "grid_infrastructure_keywords": [],
-                        "location": "not specified",
-                        "project_stage": "other",
-                        "funding_stage": "other",
-                        "investment_amount": "not specified",
-                        "strategic_relevance": "Low",
-                        "key_insights": "Analysis failed"
-                    }
-                
-                # Combine original data with analysis
-                analyzed_article = {**article_data, **analysis_json}
-                return analyzed_article
-                
-            except json.JSONDecodeError as e:
-                logger.warning(f"Failed to parse JSON from AI response: {e}")
-                # Return basic structure with original data
-                return {
-                    **article_data,
-                    "technology_type": "other",
-                    "grid_infrastructure_keywords": [],
-                    "location": "not specified",
-                    "project_stage": "other",
-                    "funding_stage": "other",
-                    "investment_amount": "not specified",
-                    "strategic_relevance": "Low",
-                    "key_insights": "Analysis failed"
-                }
-                
+                    raise ValueError("No JSON found in response")
+                    
+            except (json.JSONDecodeError, ValueError) as e:
+                logger.warning(f"Failed to parse AI response: {e}")
+                # Return default analysis
+                analysis = self._get_default_analysis()
+            
+            # Add metadata
+            analysis.update({
+                'title': article_data.get('title', 'N/A'),
+                'source': article_data.get('source', 'N/A'),
+                'date': article_data.get('date', 'N/A'),
+                'url': article_data.get('url', 'N/A'),
+                'analysis_timestamp': pd.Timestamp.now().isoformat()
+            })
+            
+            return analysis
+            
         except Exception as e:
             logger.error(f"Error analyzing article: {e}")
-            return {
-                **article_data,
-                "technology_type": "other",
-                "grid_infrastructure_keywords": [],
-                "location": "not specified",
-                "project_stage": "other",
-                "funding_stage": "other",
-                "investment_amount": "not specified",
-                "strategic_relevance": "Low",
-                "key_insights": f"Analysis error: {str(e)}"
-            }
+            return self._get_default_analysis()
     
-    def load_raw_data(self) -> pd.DataFrame:
-        """Load raw data from CSV file."""
-        filepath = os.path.join(self.data_dir, self.raw_data_file)
-        
-        if not os.path.exists(filepath):
-            raise FileNotFoundError(f"Raw data file not found: {filepath}")
-        
-        try:
-            df = pd.read_csv(filepath)
-            logger.info(f"Loaded {len(df)} articles from {filepath}")
-            return df
-        except Exception as e:
-            logger.error(f"Error loading raw data: {e}")
-            raise
-    
-    def analyze_all_articles(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Analyze all articles in the dataset."""
-        analyzed_articles = []
-        
-        logger.info(f"Starting analysis of {len(df)} articles")
-        
-        for index, row in df.iterrows():
-            logger.info(f"Analyzing article {index + 1}/{len(df)}: {row.get('title', 'No title')[:50]}...")
-            
-            article_data = row.to_dict()
-            analyzed_article = self.analyze_article(article_data)
-            analyzed_articles.append(analyzed_article)
-            
-            # Add a small delay to avoid rate limiting
-            import time
-            time.sleep(0.5)
-        
-        analyzed_df = pd.DataFrame(analyzed_articles)
-        logger.info(f"Analysis completed. Processed {len(analyzed_df)} articles")
-        
-        return analyzed_df
-    
-    def perform_gap_analysis(self, df: pd.DataFrame) -> Dict:
-        """Perform gap analysis to identify strategic opportunities."""
-        gap_analysis = {}
-        
-        # Analyze by technology type
-        tech_counts = df['technology_type'].value_counts()
-        gap_analysis['technology_gaps'] = {
-            'counts': tech_counts.to_dict(),
-            'gaps': tech_counts[tech_counts <= 1].index.tolist()
+    def _get_default_analysis(self) -> Dict:
+        """Return default analysis when AI processing fails."""
+        return {
+            'investment_thesis_tag': 'Grid Reliability',
+            'technology_readiness_level': 5,
+            'regulated_asset_potential': False,
+            'ny_service_territory_relevance': True,
+            'grid_impact_score': 5,
+            'clcpa_compliance_value': 'Requires further analysis',
+            'capital_investment_required': 'Medium',
+            'implementation_timeline': 'Medium',
+            'risk_assessment': 'Medium',
+            'strategic_priority': 'Medium',
+            'title': 'N/A',
+            'source': 'N/A',
+            'date': 'N/A',
+            'url': 'N/A',
+            'analysis_timestamp': pd.Timestamp.now().isoformat()
         }
-        
-        # Analyze by location
-        location_counts = df['location'].value_counts()
-        gap_analysis['location_gaps'] = {
-            'counts': location_counts.to_dict(),
-            'gaps': location_counts[location_counts <= 1].index.tolist()
-        }
-        
-        # Analyze strategic relevance
-        relevance_counts = df['strategic_relevance'].value_counts()
-        gap_analysis['strategic_relevance'] = {
-            'counts': relevance_counts.to_dict(),
-            'high_relevance_count': len(df[df['strategic_relevance'] == 'High'])
-        }
-        
-        # Find articles with grid infrastructure keywords
-        grid_keyword_articles = df[df['grid_infrastructure_keywords'].apply(lambda x: len(x) > 0 if isinstance(x, list) else False)]
-        gap_analysis['grid_infrastructure_mentions'] = {
-            'count': len(grid_keyword_articles),
-            'articles': grid_keyword_articles[['title', 'grid_infrastructure_keywords', 'strategic_relevance']].to_dict('records')
-        }
-        
-        return gap_analysis
     
-    def save_analyzed_data(self, df: pd.DataFrame) -> str:
-        """Save analyzed data to CSV file."""
-        filepath = os.path.join(self.data_dir, self.analyzed_data_file)
-        
-        try:
-            df.to_csv(filepath, index=False)
-            logger.info(f"Analyzed data saved to {filepath}")
-            return filepath
-        except Exception as e:
-            logger.error(f"Error saving analyzed data: {e}")
-            return ""
-    
-    def save_gap_analysis(self, gap_analysis: Dict) -> str:
-        """Save gap analysis results to JSON file."""
-        filepath = os.path.join(self.data_dir, 'gap_analysis.json')
-        
-        try:
-            with open(filepath, 'w') as f:
-                json.dump(gap_analysis, f, indent=2)
-            logger.info(f"Gap analysis saved to {filepath}")
-            return filepath
-        except Exception as e:
-            logger.error(f"Error saving gap analysis: {e}")
-            return ""
-    
-    def run(self) -> Dict:
-        """Main method to run the analyzer."""
-        logger.info("Starting offshore wind intelligence analysis")
-        
+    def process_raw_data(self) -> None:
+        """
+        Process all raw scraped data and generate strategic investment analysis.
+        """
         try:
             # Load raw data
-            raw_df = self.load_raw_data()
+            raw_data_file = os.path.join(self.data_dir, "raw_data.json")
+            if not os.path.exists(raw_data_file):
+                logger.error("Raw data file not found. Run scraper.py first.")
+                return
             
-            # Analyze all articles
-            analyzed_df = self.analyze_all_articles(raw_df)
+            with open(raw_data_file, 'r') as f:
+                raw_data = json.load(f)
             
-            # Perform gap analysis
-            gap_analysis = self.perform_gap_analysis(analyzed_df)
+            logger.info(f"Processing {len(raw_data)} articles for strategic investment analysis...")
             
-            # Save results
-            analyzed_file = self.save_analyzed_data(analyzed_df)
-            gap_file = self.save_gap_analysis(gap_analysis)
+            # Analyze each article
+            analyzed_data = []
+            for i, article in enumerate(raw_data):
+                logger.info(f"Analyzing article {i+1}/{len(raw_data)}: {article.get('title', 'Unknown')[:50]}...")
+                
+                analysis = self.analyze_article(article)
+                analyzed_data.append(analysis)
+                
+                # Rate limiting - pause between requests
+                if i < len(raw_data) - 1:
+                    import time
+                    time.sleep(1)
             
-            results = {
-                'analyzed_file': analyzed_file,
-                'gap_analysis_file': gap_file,
-                'total_articles': len(analyzed_df),
-                'gap_analysis': gap_analysis
-            }
+            # Save analyzed data
+            output_file = os.path.join(self.data_dir, "analyzed_data.csv")
+            df = pd.DataFrame(analyzed_data)
+            df.to_csv(output_file, index=False)
             
-            logger.info(f"Analysis completed successfully")
-            return results
+            # Save detailed analysis as JSON
+            strategic_analysis_file = os.path.join(self.data_dir, "strategic_analysis.json")
+            with open(strategic_analysis_file, 'w') as f:
+                json.dump(analyzed_data, f, indent=2)
+            
+            logger.info(f"Strategic investment analysis complete. Results saved to:")
+            logger.info(f"  - {output_file}")
+            logger.info(f"  - {strategic_analysis_file}")
+            
+            # Generate summary statistics
+            self._generate_summary_stats(analyzed_data)
             
         except Exception as e:
-            logger.error(f"Analysis failed: {e}")
-            raise
+            logger.error(f"Error processing data: {e}")
+    
+    def _generate_summary_stats(self, analyzed_data: List[Dict]) -> None:
+        """Generate summary statistics for strategic investment analysis."""
+        try:
+            df = pd.DataFrame(analyzed_data)
+            
+            # Investment thesis distribution
+            thesis_counts = df['investment_thesis_tag'].value_counts()
+            
+            # TRL distribution
+            trl_counts = df['technology_readiness_level'].value_counts().sort_index()
+            
+            # Regulated asset potential
+            regulated_potential = df['regulated_asset_potential'].value_counts()
+            
+            # NY territory relevance
+            ny_relevance = df['ny_service_territory_relevance'].value_counts()
+            
+            # Strategic priority distribution
+            priority_counts = df['strategic_priority'].value_counts()
+            
+            # Save summary
+            summary = {
+                'total_opportunities': len(analyzed_data),
+                'investment_thesis_distribution': thesis_counts.to_dict(),
+                'technology_readiness_distribution': trl_counts.to_dict(),
+                'regulated_asset_potential': regulated_potential.to_dict(),
+                'ny_territory_relevance': ny_relevance.to_dict(),
+                'strategic_priority_distribution': priority_counts.to_dict(),
+                'high_priority_opportunities': len(df[df['strategic_priority'] == 'High']),
+                'regulated_asset_opportunities': len(df[df['regulated_asset_potential'] == True]),
+                'high_trl_opportunities': len(df[df['technology_readiness_level'] >= 7])
+            }
+            
+            summary_file = os.path.join(self.data_dir, "strategic_summary.json")
+            with open(summary_file, 'w') as f:
+                json.dump(summary, f, indent=2)
+            
+            logger.info("Strategic investment summary generated:")
+            logger.info(f"  - Total opportunities analyzed: {summary['total_opportunities']}")
+            logger.info(f"  - High priority opportunities: {summary['high_priority_opportunities']}")
+            logger.info(f"  - Regulated asset opportunities: {summary['regulated_asset_opportunities']}")
+            logger.info(f"  - High TRL opportunities (7+): {summary['high_trl_opportunities']}")
+            
+        except Exception as e:
+            logger.error(f"Error generating summary stats: {e}")
 
 def main():
-    """Main function to run the analyzer."""
+    """Main execution function."""
     try:
-        analyzer = OffshoreWindAnalyzer()
-        results = analyzer.run()
-        
-        print(f"✅ Analysis completed successfully!")
-        print(f"📁 Analyzed data saved to: {results['analyzed_file']}")
-        print(f"📊 Gap analysis saved to: {results['gap_analysis_file']}")
-        print(f"📈 Total articles analyzed: {results['total_articles']}")
-        
-        # Print key findings
-        gap_analysis = results['gap_analysis']
-        print(f"\n🔍 Key Findings:")
-        print(f"   • Technology gaps: {len(gap_analysis['technology_gaps']['gaps'])}")
-        print(f"   • High relevance articles: {gap_analysis['strategic_relevance']['high_relevance_count']}")
-        print(f"   • Grid infrastructure mentions: {gap_analysis['grid_infrastructure_mentions']['count']}")
+        analyzer = ConEdisonStrategicAnalyzer()
+        analyzer.process_raw_data()
+        logger.info("Strategic investment analysis completed successfully!")
         
     except Exception as e:
-        print(f"❌ Error running analyzer: {e}")
-        logger.error(f"Analyzer failed: {e}")
+        logger.error(f"Analysis failed: {e}")
 
 if __name__ == "__main__":
     main() 

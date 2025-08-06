@@ -1,129 +1,186 @@
 {
   "sources": {
-    "nyserda": {
-      "name": "NYSERDA Offshore Wind",
-      "url": "https://www.nyserda.ny.gov/All-Programs/Offshore-Wind/Announcements-and-Events",
-      "description": "Primary source for New York-specific project solicitations, contract awards, and training grants",
-      "priority": "high",
-      "selectors": {
-        "articles": ".news-item, .announcement-item",
-        "title": "h2, h3, .title",
-        "link": "a",
-        "date": ".date, .published-date",
-        "content": ".content, .description"
-      }
-    },
-    "boem": {
-      "name": "BOEM New York Bight",
-      "url": "https://www.boem.gov/renewable-energy/state-activities/new-york-bight",
-      "description": "Federal-level news on lease auctions, environmental reviews, and project approvals",
-      "priority": "high",
-      "selectors": {
-        "articles": ".news-item, .announcement",
-        "title": "h2, h3, .title",
-        "link": "a",
-        "date": ".date, .published",
-        "content": ".content, .description"
-      }
-    },
-    "coned_transmission": {
-      "name": "Con Edison Transmission",
-      "url": "https://www.conedtransmission.com/es/news-and-media-center",
-      "description": "Direct, first-party news on their own projects and grid integration proposals",
-      "priority": "high",
-      "selectors": {
-        "articles": ".news-item, .media-item",
-        "title": "h2, h3, .title",
-        "link": "a",
-        "date": ".date, .published",
-        "content": ".content, .description"
-      }
-    },
-    "equinor": {
-      "name": "Equinor US News",
-      "url": "https://www.equinor.com/where-we-are/us-news",
-      "description": "Developer updates on project milestones, financial decisions, and key partnerships",
-      "priority": "medium",
-      "filters": ["offshore wind", "New York"],
-      "selectors": {
-        "articles": ".news-item, .article",
-        "title": "h2, h3, .title",
-        "link": "a",
-        "date": ".date, .published",
-        "content": ".content, .description"
-      }
-    },
-    "orsted_ny": {
-      "name": "Ørsted New York",
-      "url": "https://us.orsted.com/new-york",
-      "description": "Ørsted New York project updates and announcements",
-      "priority": "medium",
-      "selectors": {
-        "articles": ".news-item, .article",
-        "title": "h2, h3, .title",
-        "link": "a",
-        "date": ".date, .published",
-        "content": ".content, .description"
-      }
-    },
-    "orsted_news": {
-      "name": "Ørsted News Archive",
-      "url": "https://us.orsted.com/news-archive",
-      "description": "Ørsted news archive filtered for New York project news",
-      "priority": "medium",
-      "filters": ["New York", "offshore wind"],
-      "selectors": {
-        "articles": ".news-item, .article",
-        "title": "h2, h3, .title",
-        "link": "a",
-        "date": ".date, .published",
-        "content": ".content, .description"
-      }
-    },
     "renewable_energy_world": {
-      "name": "Renewable Energy World Offshore Wind",
+      "name": "Renewable Energy World",
       "url": "https://www.renewableenergyworld.com/wind-power/offshore/",
-      "description": "Industry news outlet with in-depth coverage of policy changes and infrastructure announcements",
-      "priority": "medium",
-      "filters": ["Northeast", "New York", "transmission", "infrastructure"],
+      "description": "Industry news outlet with offshore wind and grid infrastructure coverage",
+      "priority": "high",
+      "category": "offshore_wind",
       "selectors": {
-        "articles": ".article, .news-item",
-        "title": "h2, h3, .title",
+        "articles": "article, .post, .news-item, .article",
+        "title": "h1, h2, h3, .title, .headline",
         "link": "a",
-        "date": ".date, .published",
-        "content": ".content, .description"
+        "date": ".date, .published, time, .meta",
+        "content": ".content, .excerpt, .summary, p"
+      }
+    },
+    "utility_dive": {
+      "name": "Utility Dive",
+      "url": "https://www.utilitydive.com/topic/grid-modernization/",
+      "description": "Utility industry news with grid modernization and infrastructure focus",
+      "priority": "high",
+      "category": "utility_infrastructure",
+      "selectors": {
+        "articles": "article, .post, .news-item, .story",
+        "title": "h1, h2, h3, .title, .headline",
+        "link": "a",
+        "date": ".date, .published, time, .meta",
+        "content": ".content, .excerpt, .summary, p"
+      }
+    },
+    "greentech_media": {
+      "name": "Greentech Media",
+      "url": "https://www.greentechmedia.com/topics/read/smart-grid",
+      "description": "Smart grid and energy technology news",
+      "priority": "high",
+      "category": "grid_operations",
+      "selectors": {
+        "articles": "article, .post, .news-item, .story",
+        "title": "h1, h2, h3, .title, .headline",
+        "link": "a",
+        "date": ".date, .published, time, .meta",
+        "content": ".content, .excerpt, .summary, p"
+      }
+    },
+    "energy_news_network": {
+      "name": "Energy News Network",
+      "url": "https://energynews.us/category/transmission/",
+      "description": "Energy industry news with transmission and grid focus",
+      "priority": "medium",
+      "category": "utility_infrastructure",
+      "selectors": {
+        "articles": "article, .post, .news-item, .story",
+        "title": "h1, h2, h3, .title, .headline",
+        "link": "a",
+        "date": ".date, .published, time, .meta",
+        "content": ".content, .excerpt, .summary, p"
+      }
+    },
+    "pennenergy": {
+      "name": "PennEnergy",
+      "url": "https://www.pennenergy.com/topics/transmission-distribution.html",
+      "description": "Transmission and distribution industry news",
+      "priority": "medium",
+      "category": "utility_infrastructure",
+      "selectors": {
+        "articles": "article, .post, .news-item, .story",
+        "title": "h1, h2, h3, .title, .headline",
+        "link": "a",
+        "date": ".date, .published, time, .meta",
+        "content": ".content, .excerpt, .summary, p"
+      }
+    },
+    "smart_grid_news": {
+      "name": "Smart Grid News",
+      "url": "https://www.smartgridnews.com/",
+      "description": "Smart grid technology and implementation news",
+      "priority": "medium",
+      "category": "grid_operations",
+      "selectors": {
+        "articles": "article, .post, .news-item, .story",
+        "title": "h1, h2, h3, .title, .headline",
+        "link": "a",
+        "date": ".date, .published, time, .meta",
+        "content": ".content, .excerpt, .summary, p"
+      }
+    },
+    "t_d_world": {
+      "name": "T&D World",
+      "url": "https://www.tdworld.com/",
+      "description": "Transmission and distribution industry news",
+      "priority": "medium",
+      "category": "utility_infrastructure",
+      "selectors": {
+        "articles": "article, .post, .news-item, .story",
+        "title": "h1, h2, h3, .title, .headline",
+        "link": "a",
+        "date": ".date, .published, time, .meta",
+        "content": ".content, .excerpt, .summary, p"
+      }
+    },
+    "power_grid_international": {
+      "name": "Power Grid International",
+      "url": "https://www.power-grid.com/",
+      "description": "Power grid technology and infrastructure news",
+      "priority": "medium",
+      "category": "grid_operations",
+      "selectors": {
+        "articles": "article, .post, .news-item, .story",
+        "title": "h1, h2, h3, .title, .headline",
+        "link": "a",
+        "date": ".date, .published, time, .meta",
+        "content": ".content, .excerpt, .summary, p"
       }
     }
   },
   "analysis_categories": {
-    "technology_types": [
-      "Grid Infrastructure & Interconnection",
-      "Subsea Cables",
-      "Port Infrastructure",
-      "Offshore Substation Platforms",
-      "Operations & Maintenance (O&M) Services"
+    "investment_thesis_tags": [
+      "Grid Reliability",
+      "Peak Load Reduction",
+      "Transmission Decongestion",
+      "Electrification of Heat/Transport",
+      "Storm Hardening",
+      "Regulatory Compliance (CLCPA)",
+      "Energy Storage Integration",
+      "Demand Response",
+      "Grid Modernization",
+      "Renewable Integration",
+      "Microgrid Development",
+      "Smart Grid Technology",
+      "Load Balancing",
+      "Voltage Regulation",
+      "Grid Resilience",
+      "Carbon Capture",
+      "Sustainable Agriculture",
+      "Battery Storage",
+      "Grid Software"
     ],
-    "grid_infrastructure_keywords": [
-      "onshore substation",
-      "transmission upgrade",
-      "cable landing",
-      "HVDC converter station",
-      "Clean Energy Hub",
-      "interconnection agreement"
+    "technology_readiness_levels": {
+      "concept": "1-3",
+      "prototype": "4-6", 
+      "commercial": "7-9"
+    },
+    "strategic_priorities": [
+      "High",
+      "Medium", 
+      "Low"
     ],
-    "priority_locations": [
-      "New York City",
-      "Long Island",
-      "New Jersey",
-      "Massachusetts",
-      "Brooklyn"
+    "capital_investment_levels": [
+      "Low",
+      "Medium",
+      "High"
     ],
-    "project_stages": [
-      "approved",
-      "breaks ground",
-      "construction begins",
-      "in operation",
-      "fully commissioned"
+    "implementation_timelines": [
+      "Short term",
+      "Medium term",
+      "Long term"
+    ],
+    "risk_assessments": [
+      "Low",
+      "Medium",
+      "High"
+    ]
+  },
+  "utility_strategic_focus": {
+    "service_territory": ["NYC", "Westchester County"],
+    "regulated_asset_keywords": [
+      "infrastructure",
+      "grid asset",
+      "capital investment",
+      "long-term asset",
+      "rate base",
+      "utility infrastructure",
+      "transmission",
+      "distribution",
+      "substation"
+    ],
+    "clcpa_compliance_areas": [
+      "Renewable Energy",
+      "Energy Efficiency",
+      "Grid Modernization",
+      "Electrification",
+      "Carbon Reduction",
+      "Community Benefits"
     ]
   }
 } 
