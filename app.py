@@ -483,6 +483,294 @@ class ConEdisonOpportunitiesMatrix:
                 st.write(f"**Source:** {row['source_name']}")
                 st.write(f"**Summary:** {row['content'][:200]}...")
     
+    def render_heat_map(self):
+        """Render investment opportunities heat map by region and strategic fit with interactive filtering."""
+        st.markdown("## 🗺️ Investment Opportunities Heat Map")
+        
+        # Create geographic regions based on content analysis
+        def extract_region(content, title):
+            """Extract geographic region from content."""
+            text = (content + " " + title).lower()
+            
+            # Northeast region (Con Edison's primary market)
+            if any(term in text for term in ['new york', 'nyc', 'manhattan', 'brooklyn', 'queens', 'bronx', 'staten island', 'long island', 'upstate ny', 'new jersey', 'nj', 'connecticut', 'ct', 'massachusetts', 'ma', 'rhode island', 'ri', 'vermont', 'vt', 'maine', 'me', 'new hampshire', 'nh']):
+                return 'Northeast'
+            
+            # Mid-Atlantic region
+            elif any(term in text for term in ['pennsylvania', 'pa', 'delaware', 'de', 'maryland', 'md', 'virginia', 'va', 'west virginia', 'wv', 'washington dc', 'dc']):
+                return 'Mid-Atlantic'
+            
+            # Southeast region
+            elif any(term in text for term in ['florida', 'fl', 'georgia', 'ga', 'south carolina', 'sc', 'north carolina', 'nc', 'alabama', 'al', 'mississippi', 'ms', 'tennessee', 'tn', 'kentucky', 'ky']):
+                return 'Southeast'
+            
+            # Midwest region
+            elif any(term in text for term in ['illinois', 'il', 'indiana', 'in', 'michigan', 'mi', 'ohio', 'oh', 'wisconsin', 'wi', 'minnesota', 'mn', 'iowa', 'ia', 'missouri', 'mo']):
+                return 'Midwest'
+            
+            # West Coast region
+            elif any(term in text for term in ['california', 'ca', 'oregon', 'or', 'washington', 'wa', 'nevada', 'nv', 'alaska', 'ak', 'hawaii', 'hi']):
+                return 'West Coast'
+            
+            # Texas region (major energy market)
+            elif any(term in text for term in ['texas', 'tx', 'austin', 'houston', 'dallas', 'san antonio']):
+                return 'Texas'
+            
+            # National/Global (default)
+            else:
+                return 'National/Global'
+        
+        # Add region column
+        self.df['region'] = self.df.apply(lambda row: extract_region(row['content'], row['title']), axis=1)
+        
+        # Interactive Filter Controls
+        st.markdown("### 🎛️ Filter Controls")
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            # Strategic fit score filter
+            min_score, max_score = st.slider(
+                "Strategic Fit Score Range",
+                min_value=0,
+                max_value=100,
+                value=(30, 100),
+                help="Filter opportunities by strategic fit score"
+            )
+            
+            # Time period filter
+            time_period = st.selectbox(
+                "Time Period",
+                options=["All time", "Last 30 days", "Last 90 days", "Last 6 months", "Last year"],
+                help="Filter by when opportunities were identified"
+            )
+        
+        with col2:
+            # Investment thesis filter
+            available_theses = sorted(self.df['investment_thesis_tag'].unique())
+            selected_theses = st.multiselect(
+                "Investment Theses",
+                options=available_theses,
+                default=available_theses,
+                help="Select which investment theses to include"
+            )
+            
+            # TRL level filter
+            trl_options = ["All", "Early Stage (1-3)", "Mid Stage (4-6)", "Late Stage (7-9)"]
+            trl_filter = st.selectbox(
+                "TRL Level",
+                options=trl_options,
+                help="Filter by technology readiness level"
+            )
+        
+        with col3:
+            # Funding amount filter
+            min_funding = st.number_input(
+                "Minimum Funding ($M)",
+                min_value=0,
+                max_value=1000,
+                value=0,
+                help="Filter by minimum funding amount in millions"
+            )
+            
+            # Region filter
+            available_regions = sorted(self.df['region'].unique())
+            selected_regions = st.multiselect(
+                "Regions",
+                options=available_regions,
+                default=available_regions,
+                help="Select which regions to include"
+            )
+        
+        # Apply filters
+        filtered_df = self.apply_heat_map_filters(
+            min_score, max_score, time_period, selected_theses, 
+            trl_filter, min_funding, selected_regions
+        )
+        
+        # Show filter summary
+        st.markdown(f"**📊 Showing {len(filtered_df)} opportunities after filtering**")
+        
+        if len(filtered_df) == 0:
+            st.warning("⚠️ No opportunities match the current filters. Try adjusting your criteria.")
+            return
+        
+        # Create heat map data from filtered data
+        heat_data = filtered_df.groupby(['region', 'investment_thesis_tag']).agg({
+            'strategic_fit_score': 'mean',
+            'total_funding_amount_numeric': 'sum',
+            'title': 'count'
+        }).reset_index()
+        
+        heat_data.columns = ['Region', 'Investment Thesis', 'Avg Strategic Fit', 'Total Funding', 'Opportunity Count']
+        
+        # Create the heat map
+        col1, col2 = st.columns([2, 1])
+        
+        with col1:
+            st.markdown("### 📊 Strategic Fit by Region & Investment Thesis")
+            
+            # Create pivot table for heat map
+            pivot_data = heat_data.pivot(index='Region', columns='Investment Thesis', values='Avg Strategic Fit').fillna(0)
+            
+            # Create heat map using plotly
+            fig = px.imshow(
+                pivot_data,
+                title="Strategic Fit Heat Map by Region and Investment Thesis",
+                color_continuous_scale='RdYlGn',
+                aspect='auto'
+            )
+            
+            fig.update_layout(
+                xaxis_title="Investment Thesis",
+                yaxis_title="Region",
+                height=500
+            )
+            
+            st.plotly_chart(fig, use_container_width=True)
+        
+        with col2:
+            st.markdown("### 📈 Key Insights")
+            
+            # Top regions by strategic fit
+            top_regions = heat_data.groupby('Region')['Avg Strategic Fit'].mean().sort_values(ascending=False)
+            
+            st.markdown("**Top Regions by Strategic Fit:**")
+            for region, score in top_regions.head(3).items():
+                st.markdown(f"• **{region}**: {score:.1f}/100")
+            
+            # Top investment theses
+            top_theses = heat_data.groupby('Investment Thesis')['Avg Strategic Fit'].mean().sort_values(ascending=False)
+            
+            st.markdown("**Top Investment Theses:**")
+            for thesis, score in top_theses.head(3).items():
+                st.markdown(f"• **{thesis}**: {score:.1f}/100")
+        
+        # Regional breakdown
+        st.markdown("### 🎯 Regional Investment Opportunities")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            # Regional funding distribution
+            regional_funding = heat_data.groupby('Region')['Total Funding'].sum().sort_values(ascending=False)
+            
+            fig = px.bar(
+                x=regional_funding.index,
+                y=regional_funding.values,
+                title="Total Investment by Region",
+                labels={'x': 'Region', 'y': 'Total Funding ($)'}
+            )
+            fig.update_layout(xaxis_tickangle=-45)
+            st.plotly_chart(fig, use_container_width=True)
+        
+        with col2:
+            # Regional opportunity count
+            regional_opportunities = heat_data.groupby('Region')['Opportunity Count'].sum().sort_values(ascending=False)
+            
+            fig = px.bar(
+                x=regional_opportunities.index,
+                y=regional_opportunities.values,
+                title="Number of Opportunities by Region",
+                labels={'x': 'Region', 'y': 'Number of Opportunities'}
+            )
+            fig.update_layout(xaxis_tickangle=-45)
+            st.plotly_chart(fig, use_container_width=True)
+        
+        # Detailed regional analysis
+        st.markdown("### 🔍 Regional Deep Dive")
+        
+        selected_region = st.selectbox(
+            "Select a region for detailed analysis:",
+            options=sorted(heat_data['Region'].unique())
+        )
+        
+        region_data = heat_data[heat_data['Region'] == selected_region]
+        
+        if not region_data.empty:
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                avg_fit = region_data['Avg Strategic Fit'].mean()
+                st.metric("Average Strategic Fit", f"{avg_fit:.1f}/100")
+            
+            with col2:
+                total_funding = region_data['Total Funding'].sum()
+                st.metric("Total Investment", f"${total_funding:,.0f}")
+            
+            with col3:
+                opportunity_count = region_data['Opportunity Count'].sum()
+                st.metric("Opportunities", f"{opportunity_count}")
+            
+            # Show top opportunities in this region
+            region_opportunities = self.df[self.df['region'] == selected_region].nlargest(5, 'strategic_fit_score')
+            
+            st.markdown(f"**Top 5 Opportunities in {selected_region}:**")
+            for idx, row in region_opportunities.iterrows():
+                with st.expander(f"#{idx+1} - {row['title'][:50]}..."):
+                    st.write(f"**Strategic Fit:** {row['strategic_fit_score']}/100")
+                    st.write(f"**Investment Thesis:** {row['investment_thesis_tag']}")
+                    st.write(f"**Source:** {row['source_name']}")
+                    st.write(f"**Summary:** {row['content'][:150]}...")
+
+    def apply_heat_map_filters(self, min_score, max_score, time_period, selected_theses, trl_filter, min_funding, selected_regions):
+        """Apply filters to the dataset for heat map visualization."""
+        filtered_df = self.df.copy()
+        
+        # Filter by strategic fit score
+        filtered_df = filtered_df[
+            (filtered_df['strategic_fit_score'] >= min_score) & 
+            (filtered_df['strategic_fit_score'] <= max_score)
+        ]
+        
+        # Filter by investment thesis
+        if selected_theses:
+            filtered_df = filtered_df[filtered_df['investment_thesis_tag'].isin(selected_theses)]
+        
+        # Filter by region
+        if selected_regions:
+            filtered_df = filtered_df[filtered_df['region'].isin(selected_regions)]
+        
+        # Filter by funding amount
+        if min_funding > 0:
+            filtered_df = filtered_df[filtered_df['total_funding_amount_numeric'] >= (min_funding * 1000000)]
+        
+        # Filter by TRL level
+        if trl_filter != "All":
+            if trl_filter == "Early Stage (1-3)":
+                filtered_df = filtered_df[filtered_df['trl_level'].isin([1, 2, 3])]
+            elif trl_filter == "Mid Stage (4-6)":
+                filtered_df = filtered_df[filtered_df['trl_level'].isin([4, 5, 6])]
+            elif trl_filter == "Late Stage (7-9)":
+                filtered_df = filtered_df[filtered_df['trl_level'].isin([7, 8, 9])]
+        
+        # Filter by time period (if date column exists and is valid)
+        if time_period != "All time" and 'date' in filtered_df.columns:
+            try:
+                from datetime import datetime, timedelta
+                now = datetime.now()
+                
+                if time_period == "Last 30 days":
+                    cutoff_date = now - timedelta(days=30)
+                elif time_period == "Last 90 days":
+                    cutoff_date = now - timedelta(days=90)
+                elif time_period == "Last 6 months":
+                    cutoff_date = now - timedelta(days=180)
+                elif time_period == "Last year":
+                    cutoff_date = now - timedelta(days=365)
+                else:
+                    cutoff_date = None
+                
+                if cutoff_date:
+                    # Convert date column to datetime if it's not already
+                    filtered_df['date'] = pd.to_datetime(filtered_df['date'], errors='coerce')
+                    filtered_df = filtered_df[filtered_df['date'] >= cutoff_date]
+                    
+            except Exception as e:
+                st.warning(f"⚠️ Date filtering not available: {str(e)}")
+        
+        return filtered_df
+
     def render_methodology(self):
         """Render methodology and explanation."""
         st.markdown("## 🔬 Methodology")
@@ -507,6 +795,12 @@ class ConEdisonOpportunitiesMatrix:
         ### Sweet Spot Definition
         Opportunities with **Strategic Fit ≥ 70** and **TRL ≥ 7** are considered "Sweet Spot" 
         opportunities - high strategic value with proven, de-risked technology.
+        
+        ### Geographic Analysis
+        The heat map analyzes opportunities by geographic regions to identify:
+        - **Regional investment hotspots** for strategic expansion
+        - **Market gaps** where Con Edison could establish presence
+        - **Competitive intelligence** on regional market dynamics
         """)
     
     def run(self):
@@ -515,8 +809,9 @@ class ConEdisonOpportunitiesMatrix:
             self.render_header()
             
             # Create tabs
-            tab1, tab2, tab3, tab4 = st.tabs([
+            tab1, tab2, tab3, tab4, tab5 = st.tabs([
                 "🎯 Opportunities Quadrant", 
+                "🗺️ Heat Map", 
                 "🔍 Opportunity Details", 
                 "📈 Strategic Insights", 
                 "🔬 Methodology"
@@ -526,12 +821,15 @@ class ConEdisonOpportunitiesMatrix:
                 self.render_opportunities_quadrant()
             
             with tab2:
-                self.render_opportunity_details()
+                self.render_heat_map()
             
             with tab3:
-                self.render_strategic_insights()
+                self.render_opportunity_details()
             
             with tab4:
+                self.render_strategic_insights()
+            
+            with tab5:
                 self.render_methodology()
                 
         except Exception as e:
