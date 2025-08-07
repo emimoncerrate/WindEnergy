@@ -1,0 +1,105 @@
+{
+  "sources": {
+    "nyserda": {
+      "name": "NYSERDA Offshore Wind",
+      "url": "https://www.nyserda.ny.gov/All-Programs/Offshore-Wind/Announcements-and-Events",
+      "category": "offshore_wind",
+      "selectors": {
+        "articles": ".news-item",
+        "title": "h3 a",
+        "link": "h3 a",
+        "date": ".date",
+        "content": ".summary"
+      }
+    },
+    "boem": {
+      "name": "BOEM New York Bight",
+      "url": "https://www.boem.gov/renewable-energy/state-activities/new-york-bight",
+      "category": "offshore_wind",
+      "selectors": {
+        "articles": ".views-row",
+        "title": "h2 a",
+        "link": "h2 a",
+        "date": ".date",
+        "content": ".field-name-body"
+      }
+    },
+    "coned_transmission": {
+      "name": "Con Edison Transmission",
+      "url": "https://www.conedtransmission.com/es/news-and-media-center",
+      "category": "utility_infrastructure",
+      "selectors": {
+        "articles": ".news-item",
+        "title": "h3 a",
+        "link": "h3 a",
+        "date": ".date",
+        "content": ".summary"
+      }
+    },
+    "equinor_us": {
+      "name": "Equinor US News",
+      "url": "https://www.equinor.com/where-we-are/us-news",
+      "category": "developer_news",
+      "selectors": {
+        "articles": ".article-item",
+        "title": "h3 a",
+        "link": "h3 a",
+        "date": ".date",
+        "content": ".summary"
+      }
+    },
+    "orsted_ny": {
+      "name": "Ørsted New York",
+      "url": "https://us.orsted.com/new-york",
+      "category": "developer_news",
+      "selectors": {
+        "articles": ".news-card",
+        "title": "h3 a",
+        "link": "h3 a",
+        "date": ".date",
+        "content": ".text"
+      }
+    },
+    "orsted_news_archive": {
+      "name": "Ørsted News Archive",
+      "url": "https://us.orsted.com/news-archive",
+      "category": "developer_news",
+      "selectors": {
+        "articles": ".news-card",
+        "title": "h3 a",
+        "link": "h3 a",
+        "date": ".date",
+        "content": ".text"
+      }
+    },
+    "renewable_energy_world": {
+      "name": "Renewable Energy World Offshore Wind",
+      "url": "https://www.renewableenergyworld.com/wind-power/offshore/",
+      "category": "industry_news",
+      "selectors": {
+        "articles": ".article-list-item",
+        "title": "h3 a",
+        "link": "h3 a",
+        "date": ".date",
+        "content": ".excerpt"
+      }
+    }
+  },
+  "analysis_categories": {
+    "funding_keywords": [
+      "funding", "investment", "capital", "raise", "round", "seed", "series", "grant", "loan", "acquisition", "venture"
+    ],
+    "utility_keywords": [
+      "grid", "transmission", "distribution", "utility", "power", "electricity", "infrastructure", "substation", "smart grid", "reliability", "resilience", "modernization", "upgrade", "con edison", "coned", "nyc", "new york", "westchester", "clcpa", "climate", "renewable", "solar", "wind", "storage", "battery", "microgrid", "demand response", "peak load"
+    ],
+    "investment_thesis_tags": [
+      "Grid Infrastructure & Transmission",
+      "Energy Storage Solutions",
+      "Smart Grid Technologies",
+      "Renewable Integration",
+      "Demand Response & Load Management",
+      "Microgrid Development",
+      "EV Infrastructure"
+    ]
+  }
+}
